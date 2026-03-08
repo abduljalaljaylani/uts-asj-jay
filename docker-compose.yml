@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Database Service
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - jay-network
+
+  # Object Storage Service
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9001:9001"
+    networks:
+      - jay-network
+
+  # Backend/API Service
+  api:
+    build: ./app
+    ports:
+      - "8080:8080"
+    env_file: .env
+    restart: always
+    depends_on:
+      - postgres
+      - minio
+    networks:
+      - jay-network
+
+  # Frontend Service
+  frontend:
+    image: nginx:alpine
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    ports:
+      - "8082:80"
+    networks:
+      - jay-network
+
+  # Adminer
+  adminer:
+    image: adminer
+    ports:
+      - "8081:8080"
+    networks:
+      - jay-network
+
+networks:
+  jay-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:
