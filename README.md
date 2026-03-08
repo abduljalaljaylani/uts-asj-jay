@@ -11,7 +11,8 @@ Database Management: Terdapat Adminer sebagai tools untuk melakukan monitoring d
 
 Orchestration: Semua layanan berjalan dengan docker compose
 
-Penjelasan Teknis Singkat
+Penjelasan Teknis Singkat:
+
 API Backend (main.py): Menggunakan FastAPI untuk memproses data. Memiliki fitur Retry Logic untuk memastikan koneksi ke database stabil saat startup.
 
 Docker Compose: Mengintegrasikan semua layanan dalam satu jaringan virtual bernama jay-network, sehingga antara container dapat berkomunikasi secara aman.
