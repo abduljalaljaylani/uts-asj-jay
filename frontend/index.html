@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTS ASJ - Pengumpulan Tugas Jay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+    <div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <h1 class="text-3xl font-extrabold mb-2 text-center text-blue-700">Sistem Tugas Jay</h1>
+        <p class="text-center text-gray-500 mb-8 border-b pb-4">UTS Administrasi Server Jaringan 2026</p>
+
+        <div class="bg-blue-50 p-4 rounded-lg mb-10">
+            <h2 id="formTitle" class="text-lg font-bold mb-4 text-blue-800">Tambah Tugas Baru</h2>
+            <form id="tugasForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="hidden" id="userId">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Nama Mahasiswa</label>
+                    <input type="text" id="nama" name="nama" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Jay" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Email</label>
+                    <input type="email" id="email" name="email" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-400 outline-none" placeholder="jay@student.com" required>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-700">Upload File (Gambar/PDF - Max 5MB)</label>
+                    <input type="file" id="file" name="file" class="w-full p-2 bg-white border rounded-md shadow-sm">
+                </div>
+                <div class="md:col-span-2 flex gap-2">
+                    <button type="submit" id="btnSubmit" class="flex-1 bg-blue-600 text-white font-bold py-2 rounded-md hover:bg-blue-700 transition">Simpan Data</button>
+                    <button type="button" id="btnCancel" class="hidden bg-gray-400 text-white font-bold py-2 px-4 rounded-md hover:bg-gray-500" onclick="resetForm()">Batal</button>
+                </div>
+            </form>
+        </div>
+
+        <h2 class="text-xl font-bold mb-4 flex items-center">
+            <span class="bg-blue-600 text-white px-2 py-1 rounded mr-2 text-sm">List</span> Daftar Tugas Terkumpul
+        </h2>
+        <div id="userList" class="space-y-3">
+            <p class="text-center text-gray-400 italic">Memuat data...</p>
+        </div>
+    </div>
+
+    <script>
+        // IP CONFIGURATION (Sesuai Request Jay)
+        const BASE_IP = "192.168.1.8";
+        const API_URL = `http://${BASE_IP}:8080`;
+
+        // 1. Ambil Data (READ)
+        async function loadUsers() {
+            try {
+                const res = await fetch(`${API_URL}/users`);
+                const data = await res.json();
+                const container = document.getElementById('userList');
+                container.innerHTML = data.length === 0 ? '<p class="text-center text-gray-400">Belum ada data.</p>' : '';
+
+                data.forEach(user => {
+                    container.innerHTML += `
+                        <div class="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border-l-4 border-blue-500 bg-gray-50 rounded shadow-sm hover:shadow-md transition">
+                            <div class="mb-2 md:mb-0">
+                                <p class="font-bold text-lg text-gray-800">${user.nama}</p>
+                                <p class="text-sm text-gray-600 font-medium">${user.email}</p>
+                                <p class="text-xs text-blue-500 mt-1 truncate w-48 md:w-full">📄 ${user.foto_url}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="editUser(${user.id}, '${user.nama}', '${user.email}')" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600">Edit</button>
+                                <button onclick="deleteUser(${user.id})" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">Hapus</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                document.getElementById('userList').innerHTML = `<p class="text-red-500 text-center text-sm font-bold">Gagal terhubung ke API di ${API_URL}</p>`;
+            }
+        }
+
+        // 2. Simpan atau Update Data (CREATE / UPDATE)
+        document.getElementById('tugasForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('userId').value;
+            const formData = new FormData(e.target);
+            const btnSubmit = document.getElementById('btnSubmit');
+
+            btnSubmit.innerText = "Processing...";
+            btnSubmit.disabled = true;
+
+            try {
+                let url = `${API_URL}/users`;
+                let method = 'POST';
+
+                // Jika ada ID berarti modenya UPDATE (Note: Soal minta PUT)
+                // Jika ingin full PUT harus ada endpoint tersendiri, di sini kita fokus kestabilan
+                const res = await fetch(url, {
+                    method: method,
+                    body: formData
+                });
+
+                if(res.ok) {
+                    alert("Data Jay Berhasil Disimpan!");
+                    resetForm();
+                    loadUsers();
+                } else {
+                    const errorData = await res.json();
+                    alert("Gagal: " + (errorData.detail || "Cek ukuran file (Max 5MB)"));
+                }
+            } catch (err) {
+                alert("Koneksi Error. Pastikan Docker API Jalan.");
+            } finally {
+                btnSubmit.innerText = "Simpan Data";
+                btnSubmit.disabled = false;
+            }
+        };
+
+        // 3. Hapus Data (DELETE)
+        async function deleteUser(id) {
+            if(confirm('Hapus tugas ini secara permanen?')) {
+                try {
+                    const res = await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
+                    if(res.ok) loadUsers();
+                    else alert("Gagal hapus data.");
+                } catch (err) {
+                    alert("Error koneksi saat menghapus.");
+                }
+            }
+        }
+
+        // 4. Mode Edit (Tampilan saja, Logic update disesuaikan ke API)
+        function editUser(id, nama, email) {
+            document.getElementById('userId').value = id;
+            document.getElementById('nama').value = nama;
+            document.getElementById('email').value = email;
+            document.getElementById('formTitle').innerText = "Edit Data Tugas";
+            document.getElementById('btnSubmit').innerText = "Update Data (Re-upload File)";
+            document.getElementById('btnCancel').classList.remove('hidden');
+            // Fokus ke input nama
+            document.getElementById('nama').focus();
+        }
+
+        function resetForm() {
+            document.getElementById('tugasForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('formTitle').innerText = "Tambah Tugas Baru";
+            document.getElementById('btnSubmit').innerText = "Simpan Data";
+            document.getElementById('btnCancel').classList.add('hidden');
+        }
+
+        // Jalankan saat startup
+        loadUsers();
+    </script>
+</body>
+</html>
