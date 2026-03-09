@@ -1,20 +1,66 @@
-Proyek ini merupakan implementasi dari sistem manajemen tugas siswa XII TKJ 2 dengan teknologi Microservices yang dibuat untuk menyelesaikan tugas UTS  Administrasi Server Jaringan. Sistem yang diimplementasikan mengintegrasikan layanan Database, Object Storage, serta Web Server dengan layanan docker kontainer
+# 🚀 Sistem Pengumpulan Tugas Microservices (Jay-ASJ)
 
-📌 Fitur Utama
-CRUD Operations: Input, tampilkan, ubah, dan hapus data tugas.
+Proyek ini adalah implementasi sistem manajemen tugas mahasiswa berbasis Microservices yang dibangun untuk memenuhi tugas UTS Administrasi Server Jaringan. Sistem ini mengintegrasikan layanan Database, Object Storage, dan Web Server dalam lingkungan kontainer Docker.
 
-Dual Storage: Data metadata disimpan di PostgreSQL dan file fisik disimpan di MinIO Object Storage.
+# 📌 Fitur Utama
 
-File Validation: Pengecekan batasan ukuran file unggahan maksimum 5MB.
+    - CRUD Operations: Input, tampilkan, ubah, dan hapus data tugas.
 
-Database Management: Terdapat Adminer sebagai tools untuk melakukan monitoring database melalui user interface.
+    - Dual Storage: Metadata disimpan di PostgreSQL, file fisik disimpan di MinIO Object Storage.
 
-Orchestration: Semua layanan berjalan dengan docker compose
+    - File Validation: Pembatasan ukuran unggahan file maksimal 5MB.
 
-Penjelasan Teknis Singkat:
+    - Database Management: Dilengkapi dengan Adminer untuk monitoring database via GUI.
 
-API Backend (main.py): Menggunakan FastAPI untuk memproses data. Memiliki fitur Retry Logic untuk memastikan koneksi ke database stabil saat startup.
+    - Orchestration: Seluruh layanan dijalankan menggunakan Docker Compose.
 
-Docker Compose: Mengintegrasikan semua layanan dalam satu jaringan virtual bernama jay-network, sehingga antara container dapat berkomunikasi secara aman.
+# 🛠️ Arsitektur & Alokasi Port
 
-Security: Kredensial dibuat terpisah menggunakan file .env untuk menghindari kebocoran data sensitif dalam kode program.
+Sistem ini berjalan pada host IP localhost dengan pembagian port sebagai berikut:
+
+| Service | Port Host | Deskripsi Fungsi |
+| ------| ------------------------- | --------------------------------- |
+| Frontend | 8082 | Antarmuka Web (Nginx) |
+| Backend API | 8080 | Logika sistem (FastAPI) |
+| Adminer | 8081 | Database Management Tool |
+| MinIO Console | 9001 | Dashboard Object Storage |
+
+# 📂 Struktur Direktori
+
+```
+uts-asj-jay/
+├── app/                # Backend API (Python FastAPI)
+│   ├── main.py         # Otak aplikasi & logika CRUD
+│   ├── Dockerfile      # Instruksi build image API
+│   └── requirements.txt# Library Python (SQLAlchemy, MinIO, dll)
+├── frontend/           # Interface (HTML, CSS, JS)
+│   └── index.html      # Tampilan utama web
+├── .env                # Variabel lingkungan (Kredensial)
+└── docker-compose.yml  # File orkestrasi seluruh layanan
+```
+
+# 🚀 Cara Menjalankan Project
+1. Clone Repositori:
+```bash
+git clone https://github.com/UsernameKamu/uts-asj-jay.git
+cd uts-asj-jay
+```
+2. Konfigurasi Environment:
+Pastikan file `.env` sudah terisi dengan kredensial PostgreSQL dan MinIO yang sesuai.
+
+3. Build & Jalankan Docker Compose:
+```bash
+Build & Jalankan Docker Compose:
+```
+
+4. Akses Layanan:
+- Web Frontend: `http://192.168.0.127:8082`
+- API Docs: `http://192.168.0.127:8080/docs`
+- Adminer: `http://192.168.0.127:8081`
+
+# 🧠 Penjelasan Teknis Singkat
+- API Backend (main.py): Menggunakan FastAPI untuk memproses data. Memiliki fitur Retry Logic untuk memastikan koneksi ke database stabil saat startup.
+
+- Docker Compose: Mengintegrasikan semua layanan ke dalam satu jaringan virtual bernama jay-network sehingga antar kontainer bisa saling berkomunikasi dengan aman.
+
+- Security: Kredensial dipisahkan menggunakan file .env untuk mencegah kebocoran data sensitif dalam kode program.
