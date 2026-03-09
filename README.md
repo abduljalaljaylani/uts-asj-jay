@@ -1,6 +1,6 @@
 # 🚀 Sistem Pengumpulan Tugas Microservices (Jay-ASJ)
 
-Proyek ini adalah implementasi sistem manajemen tugas mahasiswa berbasis Microservices yang dibangun untuk memenuhi tugas UTS Administrasi Server Jaringan. Sistem ini mengintegrasikan layanan Database, Object Storage, dan Web Server dalam lingkungan kontainer Docker.
+Proyek ini adalah implementasi sistem manajemen tugas siswa XII TKJ 2 berbasis Microservices yang dibangun untuk memenuhi tugas UTS Administrasi Server Jaringan. Sistem ini mengintegrasikan layanan Database, Object Storage, dan Web Server dalam lingkungan kontainer Docker.
 
 # 📌 Fitur Utama
 
